@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guest {
+  id                     Int      @id @default(autoincrement())
+  fullName               String
+  email                  String?
+  phone                  String?
+  adults                 Int      @default(1)
+  children               Int      @default(0)
+  childrenUnderOrEqual6  Int      @default(0)
+  childrenOver6          Int      @default(0)
+  willAttend             Boolean
+  notes                  String?
+  createdAt              DateTime @default(now())
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  authorName  String
+  email       String?
+  content     String
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Gift {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String
+  imageUrl    String
+  priceCents  Int             @default(0)
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  orderItems  GiftOrderItem[]
+}
+
+model GiftOrder {
+  id           Int             @id @default(autoincrement())
+  buyerName    String
+  buyerEmail   String?
+  message      String?
+  totalCents   Int             @default(0)
+  status       String          @default("pendente")
+  createdAt    DateTime        @default(now())
+  items        GiftOrderItem[]
+}
+
+model GiftOrderItem {
+  id          Int       @id @default(autoincrement())
+  orderId     Int
+  giftId      Int
+  quantity    Int       @default(1)
+  unitCents   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  order       GiftOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  gift        Gift      @relation(fields: [giftId], references: [id])
+
+  @@index([orderId])
+  @@index([giftId])
+}
